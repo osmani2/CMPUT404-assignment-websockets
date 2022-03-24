@@ -300,8 +300,7 @@ function wsSetup() {
     socket = new WebSocket(url);
     socket.onopen = function() {
         //DONE: TODO What are you going to do here?
-        sendJSONXMLHTTPRequest(`/world`,null,(newObj)=>{world=newObj;drawNextFrame();update()});
-        update();
+        sendJSONXMLHTTPRequest(`/world`,null,(newObj)=>{world=newObj;drawNextFrame()});
     };
     socket.onerror = function(msg) {
         debug("WebSocket Error:" + msg.data);
