@@ -63,6 +63,6 @@ Contributors
 
 References
 ============
-Cloud.png - https://www.pngitem.com/middle/TxhRRx_cloud-animated-clipart-free-best-transparent-png-cute/ 
-sockets.py code - https://github.com/abramhindle/WebSocketsExamples
-sockets.py and index.html code - https://github.com/osmani2/CMPUT404-assignment-ajax
+* Cloud.png - https://www.pngitem.com/middle/TxhRRx_cloud-animated-clipart-free-best-transparent-png-cute/ 
+* sockets.py code - https://github.com/abramhindle/WebSocketsExamples
+* sockets.py and index.html code - https://github.com/osmani2/CMPUT404-assignment-ajax
