@@ -25,7 +25,11 @@
   <body bgcolor="white" height="100%" width="100%"> 
     <div id="debug"></div>
     <canvas id="c" width="100%" height="100%" style="-webkit-tap-highlight-color: transparent;"></canvas> 
-
+    <div style="display:none;">
+        <img id="cloud"
+             src="cloud.png"
+             width="100%">
+      </div>
     <script>
       // Fix me
 var canvas = document.getElementById('c');
@@ -42,26 +46,61 @@ function debug(str) {
 }
 debug("Test");
 
+
+function sendJSONXMLHTTPRequest(url, objects, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState==4) {
+            try {
+                if (xhr.status==200) {
+                    //DONE: parse some JSON from the request!
+                    //DONE: Pass the data to the callback!
+                    text=xhr.responseText;
+                    var newObj=JSON.parse(text);
+                    callback(newObj);
+                }
+            } 
+            catch(e) {
+                alert('Error: ' + e.name);
+            }
+        }
+    };
+    //DONE: POST to a URL
+    //DONE: set the mimetype and the accept headers!
+    // Remember to use application/json 
+    if(url===`/world`){
+        xhr.open("GET",url,true);
+
+    }else{
+        xhr.open("POST", url,true);
+    }
+    
+    xhr.overrideMimeType("application/json");
+    xhr.setRequestHeader("Accept","application/json");
+    xhr.setRequestHeader("Content-Type","application/json");
+    xhr.send(JSON.stringify(objects));
+}
+
 world = {};
 
-//XXX: TODO Make this prettier!
+//DONE: TODO Make this prettier!
+// Cloud - https://www.pngitem.com/middle/TxhRRx_cloud-animated-clipart-free-best-transparent-png-cute/ 
 function drawCircle(context,entity) {
     with(context) {
-        beginPath();                
-        lineWidth = 3;
+        beginPath();              
+        lineWidth = 30;
         var x = entity["x"];
         var y = entity["y"];
-        //moveTo(x,y);
-        fillStyle = entity["colour"];
-        strokeStyle = fillStyle;
-        arc(x, y, (entity["radius"])?entity["radius"]:50, 0, 2.0 * Math.PI, false);  
-        stroke();                                
+        var img = document.getElementById("cloud");
+        drawImage(img, x-75, y-50,150,100);
+        stroke();
+           
     }
 }
 
 function prepEntity(entity) {
     if (!entity["colour"]) {
-        entity["colour"] = "#FF0000";
+        entity["colour"] = "transparent";
     }
     if (!entity["radius"]) {
         entity["radius"] = 50;
@@ -72,8 +111,13 @@ function prepEntity(entity) {
 function clearFrame() {
     with(context) {
 	moveTo(0,0);
-	fillStyle = "#000";
+	fillStyle = "#6dadcf";
 	fillRect(0,0,W,H);
+
+    fillStyle = "#ffcd03";
+    arc(200, 200, 100, 0, 2 * Math.PI);
+    fill();
+
     }
 
 }
@@ -124,7 +168,9 @@ function getPosition(e) {
 function addEntity(entity, data) {
     world[entity] = data;
     drawNextFrame(); // (but should we?)
-    //XXX: Send a XHTML Request that updates the entity you just modified!
+    //DONE: Send a XHTML Request that updates the entity you just modified!
+    sendJSONXMLHTTPRequest(`/entity/${entity}`,data, (newObj)=>{});
+
 }
 var counter = 0;
 function addEntityWithoutName(data) {
@@ -229,7 +275,7 @@ mouse = (function() {
 })();
 
 // Add the application specific mouse listeners!
-//XXX: TODO Make these prettier!
+//DONE: TODO Make these prettier!
 mouse.mousedowners.push(function(x,y,clicked,e) {
     addEntityWithoutName({'x':x,'y':y,'colour':'blue'});
 });
@@ -253,7 +299,9 @@ function wsSetup() {
     var url = "ws://"+host+"/subscribe";   
     socket = new WebSocket(url);
     socket.onopen = function() {
-        //XXX: TODO What are you going to do here?
+        //DONE: TODO What are you going to do here?
+        sendJSONXMLHTTPRequest(`/world`,null,(newObj)=>{world=newObj;drawNextFrame();update()});
+        update();
     };
     socket.onerror = function(msg) {
         debug("WebSocket Error:" + msg.data);
@@ -261,7 +309,10 @@ function wsSetup() {
     socket.onmessage = function(msg) {  
         try {
             debug("WebSocket Recv:" + msg.data);
-            //XXX: TODO What are you going to do here?            
+            //DONE: TODO What are you going to do here?
+            var data = JSON.parse(msg.data);
+            for (const key in data)
+                addEntity(key,data[key]);            
         } catch (e) {
             alert("socket on message: " + e);
         }
